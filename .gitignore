@@ -1,0 +1,4 @@
+.env
+venv/
+data/
+medical_data.db

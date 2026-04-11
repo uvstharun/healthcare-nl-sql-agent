@@ -1,0 +1,85 @@
+<svg width="680" viewBox="0 0 680 620" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="680" height="620" fill="#ffffff"/>
+
+  <!-- Layer 1: Database -->
+  <rect x="40" y="30" width="600" height="100" rx="12" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="340" y="62" text-anchor="middle" font-size="14" font-weight="500" fill="#085041">Layer 1 — database layer</text>
+  <text x="340" y="82" text-anchor="middle" font-size="12" fill="#0F6E56">run_sql(query) connects to medicare.db, executes SQL, returns formatted results</text>
+  <text x="340" y="102" text-anchor="middle" font-size="12" fill="#0F6E56">Pure Python — no AI involved. This is the engine the agent drives.</text>
+
+  <!-- Arrow 1 -->
+  <line x1="340" y1="130" x2="340" y2="152" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Layer 2: Tool Definition -->
+  <rect x="40" y="155" width="600" height="110" rx="12" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="340" y="187" text-anchor="middle" font-size="14" font-weight="500" fill="#26215C">Layer 2 — tool definition</text>
+  <text x="340" y="207" text-anchor="middle" font-size="12" fill="#534AB7">A JSON object that describes the tool to Claude: its name, what it does,</text>
+  <text x="340" y="224" text-anchor="middle" font-size="12" fill="#534AB7">and what inputs it accepts. Claude reads this and decides when to call it.</text>
+  <text x="340" y="244" text-anchor="middle" font-size="12" fill="#534AB7">The schema description quality directly controls SQL accuracy.</text>
+
+  <!-- Arrow 2 -->
+  <line x1="340" y1="265" x2="340" y2="287" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Layer 3: Agent Loop -->
+  <rect x="40" y="290" width="600" height="80" rx="12" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+  <text x="340" y="322" text-anchor="middle" font-size="14" font-weight="500" fill="#042C53">Layer 3 — agent loop (ask_agent)</text>
+  <text x="340" y="344" text-anchor="middle" font-size="12" fill="#185FA5">Orchestrates the five-step conversation between user, Claude, and the database</text>
+
+  <!-- Five step flow heading -->
+  <text x="340" y="412" text-anchor="middle" font-size="14" font-weight="500" fill="#2C2C2A">The five-step agent loop</text>
+
+  <!-- Step 1 - Gray -->
+  <rect x="40" y="428" width="104" height="56" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text x="92" y="450" text-anchor="middle" font-size="14" font-weight="500" fill="#2C2C2A">Step 1</text>
+  <text x="92" y="468" text-anchor="middle" font-size="12" fill="#5F5E5A">Send question</text>
+  <text x="92" y="480" text-anchor="middle" font-size="12" fill="#5F5E5A">+ tools to Claude</text>
+
+  <!-- Arrow -->
+  <line x1="144" y1="456" x2="162" y2="456" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 2 - Amber -->
+  <rect x="164" y="428" width="104" height="56" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+  <text x="216" y="450" text-anchor="middle" font-size="14" font-weight="500" fill="#412402">Step 2</text>
+  <text x="216" y="468" text-anchor="middle" font-size="12" fill="#854F0B">Claude writes</text>
+  <text x="216" y="480" text-anchor="middle" font-size="12" fill="#854F0B">SQL via tool_use</text>
+
+  <!-- Arrow -->
+  <line x1="268" y1="456" x2="286" y2="456" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 3 - Coral -->
+  <rect x="288" y="428" width="104" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+  <text x="340" y="450" text-anchor="middle" font-size="14" font-weight="500" fill="#4A1B0C">Step 3</text>
+  <text x="340" y="468" text-anchor="middle" font-size="12" fill="#993C1D">Python runs</text>
+  <text x="340" y="480" text-anchor="middle" font-size="12" fill="#993C1D">SQL, gets rows</text>
+
+  <!-- Arrow -->
+  <line x1="392" y1="456" x2="410" y2="456" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 4 - Teal -->
+  <rect x="412" y="428" width="104" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="464" y="450" text-anchor="middle" font-size="14" font-weight="500" fill="#04342C">Step 4</text>
+  <text x="464" y="468" text-anchor="middle" font-size="12" fill="#0F6E56">Results sent</text>
+  <text x="464" y="480" text-anchor="middle" font-size="12" fill="#0F6E56">back to Claude</text>
+
+  <!-- Arrow -->
+  <line x1="516" y1="456" x2="534" y2="456" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 5 - Purple -->
+  <rect x="536" y="428" width="104" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="588" y="450" text-anchor="middle" font-size="14" font-weight="500" fill="#26215C">Step 5</text>
+  <text x="588" y="468" text-anchor="middle" font-size="12" fill="#534AB7">Claude explains</text>
+  <text x="588" y="480" text-anchor="middle" font-size="12" fill="#534AB7">in plain English</text>
+
+  <!-- Key insight box -->
+  <rect x="40" y="516" width="600" height="72" rx="10" fill="none" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="4 3"/>
+  <text x="340" y="542" text-anchor="middle" font-size="14" font-weight="500" fill="#2C2C2A">Key insight you learned today</text>
+  <text x="340" y="562" text-anchor="middle" font-size="12" fill="#5F5E5A">The tool description is part of your code. Changing one line of plain English</text>
+  <text x="340" y="578" text-anchor="middle" font-size="12" fill="#5F5E5A">in Layer 2 changed the SQL Claude generated from wrong to correct.</text>
+</svg>
