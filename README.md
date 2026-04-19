@@ -132,6 +132,10 @@ python agent.py
 
 ```
 healthcare-nl-sql-agent/
+
+https://github.com/user-attachments/assets/e15d9342-8aac-4eb6-b935-3d42d47e3758
+
+
 ├── agent.py              # Main agent — tool-calling loop
 ├── load_cms_data.py      # Loads CMS CSV into SQLite in chunks
 ├── setup_db.py           # Fake data setup for initial testing
@@ -144,6 +148,16 @@ healthcare-nl-sql-agent/
 ```
 
 ---
+## Demo
+
+
+
+
+
+
+
+
+---
 
 ## Why This Project
 
@@ -154,6 +168,8 @@ This agent runs against **26.7 million real Medicare records** — the kind of d
 The goal is to demonstrate that healthcare domain knowledge combined with LLM tool-calling can make complex government datasets accessible to non-technical clinical and operations staff.
 
 ---
+
+
 
 ## Author
 
