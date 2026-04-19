@@ -34,7 +34,9 @@ collection = chroma_client.get_collection(
     embedding_function=embedding_fn
 )
 
-print("Models loaded. API ready.")
+print("Models loaded. Pre-warming embedding model...")
+collection.query(query_texts=["test"], n_results=1)
+print("Embedding model warmed. API ready.")
 
 # -------------------------------------------------------
 # TOOL FUNCTIONS
@@ -189,16 +191,23 @@ def run_agent(question: str):
 class QuestionRequest(BaseModel):
     question: str
 
+# Simple in-memory cache
+query_cache = {}
 
 @app.get("/")
 def root():
     return {"status": "Healthcare AI Agent API is running"}
 
-
 @app.post("/ask")
 def ask(request: QuestionRequest):
+    # Return cached result if same question asked before
+    if request.question in query_cache:
+        print(f"Cache hit: {request.question}")
+        return query_cache[request.question]
+
     answer, tool_calls = run_agent(request.question)
-    return {
-        "answer": answer,
-        "tool_calls": tool_calls
-    }
+    result = {"answer": answer, "tool_calls": tool_calls}
+
+    # Store in cache
+    query_cache[request.question] = result
+    return result

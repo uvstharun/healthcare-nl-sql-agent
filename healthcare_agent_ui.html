@@ -3,117 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedQuery AI — Healthcare Intelligence Agent</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>MedQuery — Healthcare AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0a0f1a; --bg2: #111827; --bg3: #1a2235; --surface: #1e2d42;
-    --border: rgba(99,179,237,0.12); --border-hover: rgba(99,179,237,0.28);
-    --text: #e8f0fe; --text-muted: #8fa3bf; --text-dim: #4a6080;
-    --accent: #63b3ed; --accent-glow: rgba(99,179,237,0.15);
-    --green: #68d391; --green-glow: rgba(104,211,145,0.12);
-    --amber: #f6ad55; --red: #fc8181;
-    --serif: 'DM Serif Display', serif;
-    --sans: 'Instrument Sans', sans-serif;
-    --mono: 'DM Mono', monospace;
-  }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; overflow: hidden; }
-  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
-  body::after { content: ''; position: fixed; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,179,237,0.06) 0%, transparent 70%); pointer-events: none; z-index: 0; }
-  .layout { position: relative; z-index: 1; display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
-  .sidebar { background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-  .sidebar-header { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
-  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-  .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), #4299e1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-  .logo-text { font-family: var(--serif); font-size: 18px; color: var(--text); letter-spacing: -0.3px; }
-  .logo-sub { font-size: 11px; color: var(--text-dim); letter-spacing: 0.8px; text-transform: uppercase; font-family: var(--mono); padding-left: 42px; }
-  .sidebar-scroll { flex: 1; overflow-y: auto; }
-  .sidebar-scroll::-webkit-scrollbar { width: 3px; }
-  .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); }
-  .sidebar-section { padding: 20px 16px 8px; }
-  .section-label { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); padding: 0 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .tool-badge { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .tool-badge.sql { background: var(--accent); }
-  .tool-badge.rag { background: var(--green); }
-  .tool-badge.combined { background: var(--amber); }
-  .query-btn { width: 100%; text-align: left; background: none; border: 1px solid transparent; border-radius: 8px; padding: 9px 12px; color: var(--text-muted); font-family: var(--sans); font-size: 13px; line-height: 1.4; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 2px; }
-  .query-btn:hover { background: var(--accent-glow); border-color: var(--border-hover); color: var(--text); }
-  .query-btn:active { transform: scale(0.98); }
-  .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
-  .stats-row { display: flex; gap: 8px; }
-  .stat-chip { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; text-align: center; }
-  .stat-chip .num { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 500; }
-  .stat-chip .lbl { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-  .main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border); background: rgba(10,15,26,0.8); backdrop-filter: blur(12px); flex-shrink: 0; }
-  .topbar-left { display: flex; align-items: center; gap: 12px; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .status-text { font-size: 12px; color: var(--text-muted); font-family: var(--mono); }
-  .topbar-chips { display: flex; gap: 8px; }
-  .chip { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-family: var(--mono); border: 1px solid var(--border); color: var(--text-muted); }
-  .chip.sql { border-color: rgba(99,179,237,0.3); color: var(--accent); background: var(--accent-glow); }
-  .chip.rag { border-color: rgba(104,211,145,0.3); color: var(--green); background: var(--green-glow); }
-  .chat-area { flex: 1; overflow-y: auto; padding: 32px; scroll-behavior: smooth; }
-  .chat-area::-webkit-scrollbar { width: 4px; }
-  .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; animation: fadeIn 0.6s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-  .empty-icon { font-size: 48px; margin-bottom: 20px; opacity: 0.6; }
-  .empty-title { font-family: var(--serif); font-size: 28px; color: var(--text); margin-bottom: 8px; letter-spacing: -0.5px; }
-  .empty-sub { color: var(--text-muted); font-size: 14px; max-width: 380px; line-height: 1.6; }
-  .suggestion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 32px; max-width: 560px; }
-  .suggestion-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; text-align: left; cursor: pointer; transition: all 0.2s ease; }
-  .suggestion-card:hover { border-color: var(--border-hover); background: var(--surface); transform: translateY(-2px); }
-  .suggestion-card .s-label { font-size: 10px; font-family: var(--mono); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
-  .suggestion-card .s-text { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
-  .message { margin-bottom: 28px; animation: slideUp 0.3s ease; }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  .message.user { display: flex; justify-content: flex-end; }
-  .message.user .bubble { background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 1px solid rgba(99,179,237,0.2); border-radius: 16px 16px 4px 16px; padding: 12px 18px; max-width: 65%; color: #dbeafe; font-size: 14px; line-height: 1.5; }
-  .message.assistant .msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .agent-avatar { width: 30px; height: 30px; background: linear-gradient(135deg, var(--accent), #4299e1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-  .agent-name { font-size: 12px; font-family: var(--mono); color: var(--text-dim); }
-  .tool-tags { display: flex; gap: 6px; margin-left: auto; }
-  .tool-tag { font-size: 10px; font-family: var(--mono); padding: 3px 8px; border-radius: 10px; border: 1px solid; }
-  .tool-tag.sql { color: var(--accent); border-color: rgba(99,179,237,0.3); background: var(--accent-glow); }
-  .tool-tag.rag { color: var(--green); border-color: rgba(104,211,145,0.3); background: var(--green-glow); }
-  .msg-content { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px 16px 16px 16px; padding: 20px 24px; font-size: 14px; line-height: 1.7; color: var(--text-muted); max-width: 85%; }
-  .msg-content strong { color: var(--text); font-weight: 600; }
-  .msg-content h2, .msg-content h3 { color: var(--text); font-family: var(--serif); font-size: 16px; margin: 16px 0 8px; font-weight: 400; }
-  .msg-content ul { padding-left: 20px; margin: 8px 0; }
-  .msg-content li { margin-bottom: 4px; }
-  .msg-content p { margin-bottom: 10px; }
-  .tool-detail { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; max-width: 85%; }
-  .tool-detail-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--bg3); border-bottom: 1px solid var(--border); font-size: 11px; font-family: var(--mono); cursor: pointer; user-select: none; }
-  .tool-detail-header.sql-header { color: var(--accent); }
-  .tool-detail-header.rag-header { color: var(--green); }
-  .tool-detail-body { padding: 14px 16px; background: var(--bg); display: none; }
-  .tool-detail-body.open { display: block; }
-  .toggle-icon { margin-left: auto; transition: transform 0.2s; }
-  .toggle-icon.open { transform: rotate(180deg); }
-  .sql-code { font-family: var(--mono); font-size: 12px; color: var(--text-muted); line-height: 1.6; white-space: pre-wrap; }
-  .thinking { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-dim); font-family: var(--mono); padding: 16px 0; }
-  .thinking-dots { display: flex; gap: 4px; }
-  .thinking-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: bounce 1.2s ease-in-out infinite; }
-  .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
-  .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-5px); opacity: 1; } }
-  .error-msg { background: rgba(252,129,129,0.08); border: 1px solid rgba(252,129,129,0.2); border-radius: 10px; padding: 14px 18px; color: var(--red); font-size: 13px; font-family: var(--mono); max-width: 85%; }
-  .input-area { padding: 20px 32px 28px; flex-shrink: 0; border-top: 1px solid var(--border); background: rgba(10,15,26,0.9); backdrop-filter: blur(12px); }
-  .input-wrapper { display: flex; align-items: flex-end; gap: 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; transition: border-color 0.2s ease; }
-  .input-wrapper:focus-within { border-color: rgba(99,179,237,0.4); box-shadow: 0 0 0 3px rgba(99,179,237,0.06); }
-  .input-field { flex: 1; background: none; border: none; outline: none; color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; resize: none; max-height: 120px; overflow-y: auto; }
-  .input-field::placeholder { color: var(--text-dim); }
-  .send-btn { width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), #4299e1); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; color: white; }
-  .send-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
-  .send-btn:active { transform: scale(0.95); }
-  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .input-hint { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding: 0 4px; }
-  .hint-text { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
-  .kbd { display: inline-block; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 10px; font-family: var(--mono); color: var(--text-dim); }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #fafaf8; --surface: #ffffff; --border: #e8e6e1; --border-hover: #c8c4bc;
+  --text: #1a1917; --text-muted: #6b6760; --text-dim: #a8a49e;
+  --accent: #2563eb; --accent-light: #eff6ff; --accent-border: #bfdbfe;
+  --green: #16a34a; --green-light: #f0fdf4; --green-border: #bbf7d0;
+  --amber: #d97706; --amber-light: #fffbeb;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'Geist', system-ui, sans-serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; overflow: hidden; }
+.layout { display: grid; grid-template-columns: 256px 1fr; height: 100vh; }
+.sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-header { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 28px; height: 28px; border-radius: 6px; background: var(--text); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-mark svg { width: 14px; height: 14px; fill: white; }
+.logo-name { font-family: var(--serif); font-size: 17px; font-weight: 400; color: var(--text); letter-spacing: -0.3px; }
+.sidebar-scroll { flex: 1; overflow-y: auto; padding: 16px 12px; }
+.sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+.nav-section { margin-bottom: 20px; }
+.nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); padding: 0 8px; margin-bottom: 4px; }
+.nav-btn { width: 100%; text-align: left; background: none; border: none; border-radius: 6px; padding: 8px; color: var(--text-muted); font-family: var(--sans); font-size: 13px; line-height: 1.4; cursor: pointer; transition: all 0.12s ease; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 1px; }
+.nav-btn:hover { background: var(--bg); color: var(--text); }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.nav-dot.sql { background: var(--accent); }
+.nav-dot.rag { background: var(--green); }
+.nav-dot.combined { background: var(--amber); }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
+.footer-legend { display: flex; flex-direction: column; gap: 5px; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-dim); }
+.main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.status { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.tool-pills { display: flex; gap: 6px; }
+.pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-muted); background: var(--surface); }
+.pill.sql { border-color: var(--accent-border); color: var(--accent); background: var(--accent-light); }
+.pill.rag { border-color: var(--green-border); color: var(--green); background: var(--green-light); }
+.chat-area { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+.chat-area::-webkit-scrollbar { width: 4px; }
+.chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center; animation: rise 0.5s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.empty-title { font-family: var(--serif); font-size: 32px; font-weight: 300; color: var(--text); letter-spacing: -0.5px; margin-bottom: 8px; line-height: 1.2; }
+.empty-title em { font-style: italic; color: var(--text-muted); }
+.empty-sub { font-size: 14px; color: var(--text-muted); max-width: 340px; line-height: 1.6; margin-bottom: 36px; }
+.suggestion-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 580px; }
+.suggestion { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; text-align: left; cursor: pointer; transition: all 0.15s ease; width: 176px; flex-shrink: 0; }
+.suggestion:hover { border-color: var(--border-hover); box-shadow: 0 2px 8px rgba(0,0,0,0.06); transform: translateY(-1px); }
+.suggestion-type { font-size: 10px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+.suggestion-type.sql { color: var(--accent); }
+.suggestion-type.rag { color: var(--green); }
+.suggestion-type.combined { color: var(--amber); }
+.suggestion-text { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+.messages-wrap { padding: 28px 40px; max-width: 820px; margin: 0 auto; width: 100%; }
+.message { margin-bottom: 24px; animation: msgIn 0.25s ease both; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.message.user { display: flex; justify-content: flex-end; }
+.user-bubble { background: var(--text); color: #f5f5f3; border-radius: 16px 16px 4px 16px; padding: 11px 16px; max-width: 60%; font-size: 14px; line-height: 1.5; }
+.message.assistant .msg-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.agent-dot { width: 24px; height: 24px; border-radius: 50%; background: var(--text); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.agent-dot svg { width: 12px; height: 12px; fill: white; }
+.agent-label { font-size: 12px; color: var(--text-dim); }
+.used-tools { display: flex; gap: 5px; margin-left: auto; }
+.used-tool { font-size: 10px; padding: 2px 8px; border-radius: 10px; border: 1px solid; font-weight: 500; }
+.used-tool.sql { color: var(--accent); border-color: var(--accent-border); background: var(--accent-light); }
+.used-tool.rag { color: var(--green); border-color: var(--green-border); background: var(--green-light); }
+.msg-body { font-size: 14px; line-height: 1.75; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; padding: 18px 22px; }
+.msg-body strong { color: var(--text); font-weight: 500; }
+.msg-body h3 { color: var(--text); font-family: var(--serif); font-size: 15px; font-weight: 400; margin: 14px 0 6px; }
+.msg-body ul { padding-left: 18px; margin: 6px 0; }
+.msg-body li { margin-bottom: 3px; }
+.tool-accordion { margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.accordion-header { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: var(--bg); border-bottom: 1px solid transparent; font-size: 11px; color: var(--text-dim); cursor: pointer; user-select: none; transition: background 0.1s; }
+.accordion-header:hover { background: #f0ede8; }
+.accordion-header.open { border-bottom-color: var(--border); }
+.accordion-chevron { margin-left: auto; transition: transform 0.2s; font-size: 10px; }
+.accordion-chevron.open { transform: rotate(180deg); }
+.accordion-body { padding: 12px 14px; background: var(--surface); display: none; }
+.accordion-body.open { display: block; }
+.sql-display { font-family: 'Courier New', monospace; font-size: 12px; color: var(--text-muted); line-height: 1.6; white-space: pre-wrap; background: var(--bg); border-radius: 6px; padding: 10px 12px; }
+.thinking-wrap { display: flex; align-items: center; gap: 10px; padding: 14px 0; font-size: 13px; color: var(--text-dim); }
+.thinking-dots { display: flex; gap: 4px; }
+.thinking-dots span { width: 4px; height: 4px; border-radius: 50%; background: var(--text-dim); animation: dot 1.2s ease-in-out infinite; }
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
+.error-note { font-size: 13px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; }
+.input-area { padding: 16px 28px 22px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--surface); }
+.input-box { display: flex; align-items: flex-end; gap: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; transition: border-color 0.15s, box-shadow 0.15s; }
+.input-box:focus-within { border-color: var(--border-hover); box-shadow: 0 0 0 3px rgba(0,0,0,0.04); }
+.input-field { flex: 1; background: none; border: none; outline: none; color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; resize: none; max-height: 120px; overflow-y: auto; }
+.input-field::placeholder { color: var(--text-dim); }
+.send-btn { width: 32px; height: 32px; border-radius: 8px; background: var(--text); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s, transform 0.12s; color: white; }
+.send-btn:hover { opacity: 0.85; }
+.send-btn:active { transform: scale(0.94); }
+.send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.input-hint { display: flex; justify-content: space-between; margin-top: 8px; padding: 0 2px; font-size: 11px; color: var(--text-dim); }
+.kbd { background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; font-size: 10px; }
 </style>
 </head>
 <body>
@@ -121,282 +115,236 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <div class="logo-icon">⚕</div>
-        <span class="logo-text">MedQuery</span>
+        <div class="logo-mark">
+          <svg viewBox="0 0 16 16"><path d="M8 1a1 1 0 0 1 1 1v5h5a1 1 0 0 1 0 2H9v5a1 1 0 0 1-2 0V9H2a1 1 0 0 1 0-2h5V2a1 1 0 0 1 1-1z"/></svg>
+        </div>
+        <span class="logo-name">MedQuery</span>
       </div>
-      <div class="logo-sub">Healthcare Intelligence Agent</div>
     </div>
     <div class="sidebar-scroll">
-      <div class="sidebar-section">
-        <div class="section-label"><span class="tool-badge sql"></span>Data queries</div>
-        <button class="query-btn" onclick="loadQuestion('How many providers prescribed Metformin in California?')"><span class="tool-badge sql" style="margin-top:5px;flex-shrink:0"></span>How many providers prescribed Metformin in California?</button>
-        <button class="query-btn" onclick="loadQuestion('Which specialty prescribes the most Atorvastatin?')"><span class="tool-badge sql" style="margin-top:5px;flex-shrink:0"></span>Which specialty prescribes the most Atorvastatin?</button>
-        <button class="query-btn" onclick="loadQuestion('What are the top 5 states by total drug cost?')"><span class="tool-badge sql" style="margin-top:5px;flex-shrink:0"></span>What are the top 5 states by total drug cost?</button>
-        <button class="query-btn" onclick="loadQuestion('How many unique providers are in Texas?')"><span class="tool-badge sql" style="margin-top:5px;flex-shrink:0"></span>How many unique providers are in Texas?</button>
-        <button class="query-btn" onclick="loadQuestion('What is the average drug cost per claim in New York?')"><span class="tool-badge sql" style="margin-top:5px;flex-shrink:0"></span>What is the average drug cost per claim in New York?</button>
+      <div class="nav-section">
+        <div class="nav-label">Data queries</div>
+        <button class="nav-btn" onclick="loadQ('How many providers prescribed Metformin in California?')"><span class="nav-dot sql"></span>Metformin providers in California</button>
+        <button class="nav-btn" onclick="loadQ('Which specialty prescribes the most Atorvastatin?')"><span class="nav-dot sql"></span>Top specialty for Atorvastatin</button>
+        <button class="nav-btn" onclick="loadQ('What are the top 5 states by total drug cost?')"><span class="nav-dot sql"></span>Top 5 states by drug cost</button>
+        <button class="nav-btn" onclick="loadQ('How many unique providers are in Texas?')"><span class="nav-dot sql"></span>Unique providers in Texas</button>
+        <button class="nav-btn" onclick="loadQ('What is the average drug cost per claim in New York?')"><span class="nav-dot sql"></span>Avg drug cost per claim, NY</button>
       </div>
-      <div class="sidebar-section">
-        <div class="section-label"><span class="tool-badge rag"></span>Clinical guidelines</div>
-        <button class="query-btn" onclick="loadQuestion('What do guidelines say about diabetes dietary management?')"><span class="tool-badge rag" style="margin-top:5px;flex-shrink:0"></span>What do guidelines say about diabetes dietary management?</button>
-        <button class="query-btn" onclick="loadQuestion('What is the evidence for statin therapy in heart disease?')"><span class="tool-badge rag" style="margin-top:5px;flex-shrink:0"></span>What is the evidence for statin therapy in heart disease?</button>
+      <div class="nav-section">
+        <div class="nav-label">Clinical guidelines</div>
+        <button class="nav-btn" onclick="loadQ('What do guidelines say about diabetes dietary management?')"><span class="nav-dot rag"></span>Diabetes dietary guidelines</button>
+        <button class="nav-btn" onclick="loadQ('What is the evidence for statin therapy in heart disease?')"><span class="nav-dot rag"></span>Statin therapy evidence</button>
       </div>
-      <div class="sidebar-section">
-        <div class="section-label"><span class="tool-badge combined"></span>Combined</div>
-        <button class="query-btn" onclick="loadQuestion('How many providers prescribed Metformin and what do guidelines say about it?')"><span class="tool-badge combined" style="margin-top:5px;flex-shrink:0"></span>How many providers prescribed Metformin and what do guidelines say about it?</button>
-        <button class="query-btn" onclick="loadQuestion('How many Atorvastatin claims and what do guidelines say about statins?')"><span class="tool-badge combined" style="margin-top:5px;flex-shrink:0"></span>How many Atorvastatin claims and what do guidelines say about statins?</button>
+      <div class="nav-section">
+        <div class="nav-label">Combined</div>
+        <button class="nav-btn" onclick="loadQ('How many providers prescribed Metformin and what do guidelines say about it?')"><span class="nav-dot combined"></span>Metformin — data + guidelines</button>
+        <button class="nav-btn" onclick="loadQ('How many Atorvastatin claims and what do guidelines say about statins?')"><span class="nav-dot combined"></span>Atorvastatin — data + guidelines</button>
       </div>
     </div>
     <div class="sidebar-footer">
-      <div class="stats-row">
-        <div class="stat-chip"><div class="num">26.7M</div><div class="lbl">Medicare rows</div></div>
-        <div class="stat-chip"><div class="num">178</div><div class="lbl">Doc chunks</div></div>
-        <div class="stat-chip"><div class="num">2</div><div class="lbl">Tools active</div></div>
+      <div class="footer-legend">
+        <div class="legend-item"><span class="nav-dot sql"></span> SQL — Medicare database</div>
+        <div class="legend-item"><span class="nav-dot rag"></span> RAG — Clinical guidelines</div>
+        <div class="legend-item"><span class="nav-dot combined"></span> Combined — both tools</div>
       </div>
     </div>
   </aside>
 
   <main class="main">
     <div class="topbar">
-      <div class="topbar-left">
-        <div class="status-dot" id="statusDot"></div>
-        <span class="status-text" id="statusText">claude-haiku-4-5 · ready</span>
+      <div class="status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Ready</span>
       </div>
-      <div class="topbar-chips">
-        <div class="chip sql">🔵 SQL · CMS Medicare 2023</div>
-        <div class="chip rag">🟢 RAG · Clinical Guidelines</div>
+      <div class="tool-pills">
+        <span class="pill sql">SQL · Medicare 2023</span>
+        <span class="pill rag">RAG · Guidelines</span>
       </div>
     </div>
 
     <div class="chat-area" id="chatArea">
       <div class="empty-state" id="emptyState">
-        <div class="empty-icon">⚕</div>
-        <div class="empty-title">Ask anything about Medicare</div>
-        <div class="empty-sub">Query 26.7 million prescription records or search clinical guidelines — in plain English, no SQL required.</div>
-        <div class="suggestion-grid">
-          <div class="suggestion-card" onclick="loadQuestion('Which state has the highest total drug cost?')">
-            <div class="s-label"><span class="tool-badge sql"></span> Data</div>
-            <div class="s-text">Which state has the highest total drug cost?</div>
+        <div class="empty-title">Ask anything about<br><em>Medicare data</em></div>
+        <p class="empty-sub">Query 26.7 million prescription records or search clinical guidelines</p>
+        <div class="suggestion-row">
+          <div class="suggestion" onclick="loadQ('What are the top 5 most prescribed generic drugs?')">
+            <div class="suggestion-type sql"><span class="nav-dot sql"></span> Data</div>
+            <div class="suggestion-text">Top 5 most prescribed generic drugs</div>
           </div>
-          <div class="suggestion-card" onclick="loadQuestion('What do guidelines say about diabetes dietary management?')">
-            <div class="s-label"><span class="tool-badge rag"></span> Clinical</div>
-            <div class="s-text">What do guidelines say about diabetes dietary management?</div>
+          <div class="suggestion" onclick="loadQ('What do guidelines say about diabetes dietary management?')">
+            <div class="suggestion-type rag"><span class="nav-dot rag"></span> Clinical</div>
+            <div class="suggestion-text">Guidelines for diabetes dietary management</div>
           </div>
-          <div class="suggestion-card" onclick="loadQuestion('How many providers prescribed Metformin in California?')">
-            <div class="s-label"><span class="tool-badge sql"></span> Data</div>
-            <div class="s-text">How many providers prescribed Metformin in California?</div>
-          </div>
-          <div class="suggestion-card" onclick="loadQuestion('How many providers prescribed Metformin and what do guidelines say about it?')">
-            <div class="s-label"><span class="tool-badge combined"></span> Combined</div>
-            <div class="s-text">Metformin prescribers + what guidelines say about it</div>
+          <div class="suggestion" onclick="loadQ('How many providers prescribed Metformin and what do guidelines say about it?')">
+            <div class="suggestion-type combined"><span class="nav-dot combined"></span> Combined</div>
+            <div class="suggestion-text">Metformin prescribers + clinical evidence</div>
           </div>
         </div>
       </div>
+      <div class="messages-wrap" id="messagesWrap" style="display:none"></div>
     </div>
 
     <div class="input-area">
-      <div class="input-wrapper">
+      <div class="input-box">
         <textarea class="input-field" id="inputField" placeholder="Ask about Medicare data or clinical guidelines..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <button class="send-btn" id="sendBtn" onclick="send()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
         </button>
       </div>
       <div class="input-hint">
-        <span class="hint-text">Connected to localhost:8000 · FastAPI + Claude</span>
-        <span class="hint-text"><kbd class="kbd">⌘</kbd> + <kbd class="kbd">↵</kbd> to send</span>
+        <span>Connected to localhost:8000</span>
+        <span><kbd class="kbd">⌘</kbd> + <kbd class="kbd">↵</kbd> to send</span>
       </div>
     </div>
   </main>
 </div>
 
 <script>
-  const API_URL = 'http://127.0.0.1:8000';
-  const chatArea = document.getElementById('chatArea');
-  const emptyState = document.getElementById('emptyState');
-  const inputField = document.getElementById('inputField');
-  const sendBtn = document.getElementById('sendBtn');
-  const statusDot = document.getElementById('statusDot');
-  const statusText = document.getElementById('statusText');
-  let messageCount = 0;
-  let isLoading = false;
+const API = 'http://127.0.0.1:8000';
+const chatArea = document.getElementById('chatArea');
+const emptyState = document.getElementById('emptyState');
+const messagesWrap = document.getElementById('messagesWrap');
+const inputField = document.getElementById('inputField');
+const sendBtn = document.getElementById('sendBtn');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+let count = 0, busy = false;
 
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-  }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function handleKey(e) { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); send(); } }
+function loadQ(q) { inputField.value = q; autoResize(inputField); inputField.focus(); }
+function scrollDown() { chatArea.scrollTop = chatArea.scrollHeight; }
+function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function handleKey(e) {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); sendMessage(); }
-  }
+function fmt(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.*?)$/gm, '<h3>$1</h3>')
+    .replace(/^- (.*?)$/gm, '<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
 
-  function loadQuestion(q) {
-    inputField.value = q;
-    autoResize(inputField);
+function setStatus(loading) {
+  busy = loading;
+  sendBtn.disabled = loading;
+  inputField.disabled = loading;
+  statusDot.style.background = loading ? '#f59e0b' : 'var(--green)';
+  statusText.textContent = loading ? 'Thinking...' : 'Ready';
+}
+
+function showMessages() { emptyState.style.display = 'none'; messagesWrap.style.display = 'block'; }
+
+function agentIcon() {
+  return `<div class="agent-dot"><svg viewBox="0 0 16 16"><path d="M8 1a1 1 0 0 1 1 1v5h5a1 1 0 0 1 0 2H9v5a1 1 0 0 1-2 0V9H2a1 1 0 0 1 0-2h5V2a1 1 0 0 1 1-1z"/></svg></div>`;
+}
+
+function addUser(text) {
+  if (count === 0) showMessages();
+  count++;
+  const div = document.createElement('div');
+  div.className = 'message user';
+  div.innerHTML = `<div class="user-bubble">${esc(text)}</div>`;
+  messagesWrap.appendChild(div);
+  scrollDown();
+}
+
+function addThinking() {
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  div.id = 'thinking';
+  div.innerHTML = `
+    <div class="msg-meta">${agentIcon()}<span class="agent-label">MedQuery</span></div>
+    <div class="thinking-wrap">
+      <div class="thinking-dots"><span></span><span></span><span></span></div>
+      Querying...
+    </div>`;
+  messagesWrap.appendChild(div);
+  scrollDown();
+}
+
+function removeThinking() { const t = document.getElementById('thinking'); if (t) t.remove(); }
+
+function toggle(id) {
+  document.getElementById('b-'+id).classList.toggle('open');
+  document.getElementById('c-'+id).classList.toggle('open');
+  document.getElementById('h-'+id).classList.toggle('open');
+}
+
+function addAssistant(answer, toolCalls) {
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  const types = [...new Set(toolCalls.map(t => t.type))];
+  const tags = types.map(t => `<span class="used-tool ${t.toLowerCase()}">${t}</span>`).join('');
+  let accordions = '';
+  toolCalls.forEach((call, i) => {
+    const id = `${count}-${i}`;
+    const isSql = call.type === 'SQL';
+    const preview = call.input.length > 55 ? call.input.slice(0, 55) + '...' : call.input;
+    accordions += `
+      <div class="tool-accordion">
+        <div class="accordion-header" id="h-${id}" onclick="toggle('${id}')">
+          <span>${isSql ? 'SQL query' : 'Guidelines search'}</span>
+          <span style="color:var(--text-dim);font-size:10px;margin-left:4px">${esc(preview)}</span>
+          <span class="accordion-chevron" id="c-${id}">▾</span>
+        </div>
+        <div class="accordion-body" id="b-${id}">
+          ${isSql ? `<div class="sql-display">${esc(call.input)}</div>` : `<div style="font-size:12px;color:var(--text-dim)">Search: ${esc(call.input)}</div>`}
+        </div>
+      </div>`;
+  });
+  div.innerHTML = `
+    <div class="msg-meta">${agentIcon()}<span class="agent-label">MedQuery</span><div class="used-tools">${tags}</div></div>
+    <div class="msg-body">${fmt(answer)}</div>
+    ${accordions}`;
+  messagesWrap.appendChild(div);
+  scrollDown();
+}
+
+function addError(msg) {
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  div.innerHTML = `<div class="msg-meta">${agentIcon()}<span class="agent-label">MedQuery</span></div><div class="error-note">${esc(msg)}</div>`;
+  messagesWrap.appendChild(div);
+  scrollDown();
+}
+
+async function send() {
+  if (busy) return;
+  const text = inputField.value.trim();
+  if (!text) return;
+  inputField.value = '';
+  inputField.style.height = 'auto';
+  addUser(text);
+  setStatus(true);
+  addThinking();
+  try {
+    const res = await fetch(`${API}/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: text })
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+    removeThinking();
+    addAssistant(data.answer, data.tool_calls || []);
+  } catch (err) {
+    removeThinking();
+    addError(err.message.includes('fetch') || err.message.includes('Failed')
+      ? 'Cannot reach the backend. Run: uvicorn api:app --reload --port 8000'
+      : `Error: ${err.message}`);
+  } finally {
+    setStatus(false);
     inputField.focus();
   }
+}
 
-  function scrollToBottom() { chatArea.scrollTop = chatArea.scrollHeight; }
-
-  function setLoading(loading) {
-    isLoading = loading;
-    sendBtn.disabled = loading;
-    inputField.disabled = loading;
-    if (loading) {
-      statusDot.style.background = 'var(--amber)';
-      statusDot.style.boxShadow = '0 0 8px var(--amber)';
-      statusText.textContent = 'claude-haiku-4-5 · thinking...';
-    } else {
-      statusDot.style.background = 'var(--green)';
-      statusDot.style.boxShadow = '0 0 8px var(--green)';
-      statusText.textContent = 'claude-haiku-4-5 · ready';
-    }
-  }
-
-  function escapeHtml(text) {
-    return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function formatAnswer(text) {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
-      .replace(/^- (.*?)$/gm, '<li>$1</li>')
-      .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
-      .replace(/\n\n/g, '<br><br>')
-      .replace(/\n/g, '<br>');
-  }
-
-  function toggleDetail(id) {
-    const body = document.getElementById('body-' + id);
-    const icon = document.getElementById('icon-' + id);
-    body.classList.toggle('open');
-    icon.classList.toggle('open');
-  }
-
-  function addUserMessage(text) {
-    if (messageCount === 0) emptyState.style.display = 'none';
-    messageCount++;
-    const div = document.createElement('div');
-    div.className = 'message user';
-    div.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
-    chatArea.appendChild(div);
-    scrollToBottom();
-  }
-
-  function addThinking() {
-    const div = document.createElement('div');
-    div.className = 'message assistant';
-    div.id = 'thinking';
-    div.innerHTML = `
-      <div class="msg-header">
-        <div class="agent-avatar">⚕</div>
-        <span class="agent-name">MedQuery Agent</span>
-      </div>
-      <div class="thinking">
-        <div class="thinking-dots"><span></span><span></span><span></span></div>
-        Querying 26.7M rows...
-      </div>`;
-    chatArea.appendChild(div);
-    scrollToBottom();
-  }
-
-  function removeThinking() {
-    const t = document.getElementById('thinking');
-    if (t) t.remove();
-  }
-
-  function addAssistantMessage(answer, toolCalls) {
-    const div = document.createElement('div');
-    div.className = 'message assistant';
-    const toolTypes = [...new Set(toolCalls.map(t => t.type))];
-    const toolTags = toolTypes.map(t =>
-      `<span class="tool-tag ${t.toLowerCase()}">${t === 'SQL' ? '🔵 SQL' : '🟢 RAG'}</span>`
-    ).join('');
-
-    let toolDetailsHTML = '';
-    toolCalls.forEach((call, i) => {
-      const id = `tool-${messageCount}-${i}`;
-      const isSql = call.type === 'SQL';
-      const headerClass = isSql ? 'sql-header' : 'rag-header';
-      const icon = isSql ? '🔵' : '🟢';
-      const label = isSql ? 'SQL Query' : 'Guidelines Search';
-      const preview = call.input.length > 70 ? call.input.slice(0, 70) + '...' : call.input;
-      toolDetailsHTML += `
-        <div class="tool-detail">
-          <div class="tool-detail-header ${headerClass}" onclick="toggleDetail('${id}')">
-            ${icon} ${label} — <span style="opacity:0.7;font-size:10px">${escapeHtml(preview)}</span>
-            <span class="toggle-icon" id="icon-${id}">▾</span>
-          </div>
-          <div class="tool-detail-body" id="body-${id}">
-            ${isSql
-              ? `<div class="sql-code">${escapeHtml(call.input)}</div>`
-              : `<div style="font-size:12px;color:var(--text-dim);font-family:var(--mono)">Search query: ${escapeHtml(call.input)}</div>`
-            }
-          </div>
-        </div>`;
-    });
-
-    div.innerHTML = `
-      <div class="msg-header">
-        <div class="agent-avatar">⚕</div>
-        <span class="agent-name">MedQuery Agent</span>
-        <div class="tool-tags">${toolTags}</div>
-      </div>
-      <div class="msg-content">${formatAnswer(answer)}</div>
-      ${toolDetailsHTML}`;
-    chatArea.appendChild(div);
-    scrollToBottom();
-  }
-
-  function addErrorMessage(msg) {
-    const div = document.createElement('div');
-    div.className = 'message assistant';
-    div.innerHTML = `
-      <div class="msg-header">
-        <div class="agent-avatar">⚕</div>
-        <span class="agent-name">MedQuery Agent</span>
-      </div>
-      <div class="error-msg">⚠ ${escapeHtml(msg)}</div>`;
-    chatArea.appendChild(div);
-    scrollToBottom();
-  }
-
-  async function sendMessage() {
-    if (isLoading) return;
-    const text = inputField.value.trim();
-    if (!text) return;
-    inputField.value = '';
-    inputField.style.height = 'auto';
-    addUserMessage(text);
-    setLoading(true);
-    addThinking();
-    try {
-      const response = await fetch(`${API_URL}/ask`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text })
-      });
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
-      const data = await response.json();
-      removeThinking();
-      addAssistantMessage(data.answer, data.tool_calls || []);
-    } catch (err) {
-      removeThinking();
-      if (err.message.includes('fetch') || err.message.includes('NetworkError') || err.message.includes('Failed')) {
-        addErrorMessage('Cannot reach the backend. Make sure it is running: uvicorn api:app --reload --port 8000');
-      } else {
-        addErrorMessage(`Error: ${err.message}`);
-      }
-    } finally {
-      setLoading(false);
-      inputField.focus();
-    }
-  }
-
-  inputField.focus();
+inputField.focus();
 </script>
 </body>
 </html>
