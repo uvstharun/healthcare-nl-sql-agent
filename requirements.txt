@@ -1,0 +1,11 @@
+anthropic==0.94.0
+chromadb==1.5.7
+fastapi==0.135.3
+httpx==0.28.1
+pandas==3.0.2
+pypdf==6.10.0
+python-dotenv==1.2.2
+requests==2.33.1
+sentence-transformers==5.4.0
+streamlit==1.56.0
+uvicorn==0.44.0
