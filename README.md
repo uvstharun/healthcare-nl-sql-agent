@@ -1,42 +1,51 @@
-# Healthcare NL-to-SQL Agent
+# Healthcare AI Agent — NL-to-SQL + Clinical Guidelines
 
-A conversational AI agent that translates plain English questions into SQL queries against real Medicare Part D data — no SQL knowledge required.
+A multi-tool AI agent that answers healthcare questions in plain English by querying Medicare prescribing data and searching clinical guidelines simultaneously.
 
-Built with the Anthropic Claude API using raw tool-calling (no LangChain), running against 26.7 million rows of CMS Medicare prescribing data.
+Built with the Anthropic Claude API using raw tool-calling — no LangChain, no LangGraph.
+
+---
+
+## Demo
+
+> Add your demo video link here after uploading
 
 ---
 
 ## What It Does
 
-Instead of writing SQL, a user can ask:
+Ask a question in plain English. The agent decides which tool to use — or uses both:
 
-> *"Which state has the highest total drug cost?"*
+| Question type | Tool used |
+|---|---|
+| "How many providers prescribed Metformin in California?" | SQL only |
+| "What do guidelines say about diabetes dietary management?" | RAG only |
+| "How many providers prescribed Metformin and what do guidelines say about it?" | Both tools |
 
-The agent:
-1. Sends the question to Claude along with the database schema
-2. Claude generates a SQL query using tool-calling
-3. The query runs against the local SQLite database (26.7M rows)
-4. Results are returned to Claude
-5. Claude explains the answer in plain English
+The agent writes its own SQL, searches clinical PDFs, and synthesizes both into one answer — without you writing a single line of SQL.
 
 ---
 
 ## Architecture
 
 ```
-User Question (plain English)
-        ↓
-Claude reads schema → writes SQL via tool_use
-        ↓
-Python executes SQL against SQLite (26.7M rows)
-        ↓
-Results returned to Claude
-        ↓
-Claude narrates answer in plain English
+User Question
+      ↓
+HTML Frontend → FastAPI (api.py) → Agent Loop
+                                        ↓
+                              Claude (claude-haiku-4-5)
+                              decides which tool(s) to call
+                                   ↓            ↓
+                              SQL Tool       RAG Tool
+                              SQLite DB      ChromaDB
+                              CMS Medicare   Clinical PDFs
+                                   ↓            ↓
+                              Results returned to Claude
+                                        ↓
+                              Plain English answer
 ```
 
-**Key design decision:** The tool description (schema) is treated as code.
-Precise column descriptions directly control SQL accuracy — no fine-tuning needed.
+**Key design decision:** No frameworks. The tool-calling loop is written from scratch so every step is transparent and debuggable. The schema description in the tool definition is treated as code — precise column descriptions directly control SQL accuracy.
 
 ---
 
@@ -46,44 +55,54 @@ Precise column descriptions directly control SQL accuracy — no fine-tuning nee
 |---|---|
 | LLM | Anthropic Claude (claude-haiku-4-5) |
 | Agent pattern | Raw tool-calling via Anthropic SDK |
-| Database | SQLite |
-| Data loading | pandas (chunked, 100k rows at a time) |
-| Data source | CMS Medicare Part D Prescribers 2023 |
+| API layer | FastAPI + uvicorn |
+| Structured data | SQLite — CMS Medicare Part D 2023 |
+| Vector store | ChromaDB |
+| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| Document parsing | pypdf |
+| Data loading | pandas (chunked) |
+| Frontend | Custom HTML/CSS/JS |
+| Streamlit UI | app.py (alternative interface) |
 | Language | Python 3.13 |
 
-No LangChain. No LangGraph. No vector database. Just the Anthropic SDK and SQLite.
+No LangChain. No LangGraph. No fine-tuning.
 
 ---
 
-## Sample Questions and Answers
+## Sample Questions
 
-**Q: Which state has the highest total drug cost?**
+**SQL query:**
 ```
+Q: How many providers prescribed Metformin in California?
+
 Generated SQL:
-SELECT Prscrbr_State_Abrvtn, SUM(Tot_Drug_Cst) as Total_Drug_Cost
+SELECT COUNT(DISTINCT Prscrbr_NPI) as unique_providers
 FROM prescriptions
-WHERE Prscrbr_State_Abrvtn IS NOT NULL
-GROUP BY Prscrbr_State_Abrvtn
-ORDER BY Total_Drug_Cost DESC LIMIT 1
+WHERE Gnrc_Name LIKE '%metformin%'
+AND Prscrbr_State_Abrvtn = 'CA'
 
-Answer: California (CA) has the highest total drug cost at $20.9 billion
-in Medicare Part D prescription drug costs for 2023.
+Answer: 18,432 providers in California prescribed Metformin in 2023.
 ```
 
-**Q: What are the top 5 most prescribed generic drugs by total claims?**
+**RAG query:**
 ```
-Answer:
-1. Atorvastatin Calcium — 67,633,912 claims
-2. Amlodipine Besylate — 46,601,898 claims
-3. Levothyroxine Sodium — 45,138,029 claims
-4. Lisinopril — 35,257,305 claims
-5. Gabapentin — 33,913,654 claims
+Q: What do guidelines say about diabetes dietary management?
+
+Answer: Based on ADA 2024 guidelines, dietary management should be
+individualized — no one-size-fits-all approach. Medical Nutrition
+Therapy (MNT) by a Registered Dietitian is recommended at diagnosis.
+MNT reduces A1C by 0.3-2.0% in type 2 diabetes.
 ```
 
-**Q: How many unique providers are there in California?**
+**Combined query:**
 ```
-Answer: There are 110,430 unique providers in California
-in the Medicare Part D prescriptions database.
+Q: How many providers prescribed Metformin and what do guidelines say about it?
+
+SQL Tool  → 255,046 Medicare providers prescribed Metformin in 2023
+RAG Tool  → ADA guidelines emphasize comprehensive diabetes management
+            combining MNT, DSMES, and pharmacological treatment
+
+Answer: Both results synthesized into one plain English response.
 ```
 
 ---
@@ -100,7 +119,7 @@ cd healthcare-nl-sql-agent
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install anthropic python-dotenv pandas
+pip install -r requirements.txt
 ```
 
 ### 3. Add your Anthropic API key
@@ -110,20 +129,40 @@ echo "ANTHROPIC_API_KEY=your_key_here" >> .env
 ```
 
 ### 4. Download the CMS data
-Download the Medicare Part D Prescribers by Provider and Drug dataset (2023) from:
+Download the Medicare Part D Prescribers by Provider and Drug dataset (2023):
 https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug
 
-Place the CSV file in the `data/` folder.
+Place the CSV file in the data/ folder.
 
 ### 5. Load data into SQLite
 ```bash
 python load_cms_data.py
 ```
-This loads 26.7 million rows in chunks — takes 2-4 minutes.
 
-### 6. Run the agent
+### 6. Download clinical guidelines PDFs
 ```bash
-python agent.py
+python download_docs.py
+```
+Or manually save any clinical PDF into the docs/ folder.
+
+### 7. Build the vector store
+```bash
+python build_vectorstore.py
+```
+
+### 8. Start the API
+```bash
+uvicorn api:app --reload --port 8000
+```
+
+### 9. Open the frontend
+```bash
+open healthcare_agent_ui.html
+```
+
+Or run the Streamlit app instead:
+```bash
+streamlit run app.py
 ```
 
 ---
@@ -132,6 +171,24 @@ python agent.py
 
 ```
 healthcare-nl-sql-agent/
+<<<<<<< HEAD
+├── agent.py                  # Core agent — tool-calling loop
+├── api.py                    # FastAPI backend — serves HTML frontend
+├── app.py                    # Streamlit UI (alternative interface)
+├── build_vectorstore.py      # Builds ChromaDB from clinical PDFs
+├── download_docs.py          # Downloads clinical guideline PDFs
+├── explore_data.py           # Data exploration script
+├── load_cms_data.py          # Loads CMS CSV into SQLite in chunks
+├── setup_db.py               # Fake data setup for initial testing
+├── test_connection.py        # Anthropic API connection test
+├── test_rag.py               # RAG retrieval test
+├── healthcare_agent_ui.html  # HTML frontend connected to API
+├── requirements.txt
+├── data/                     # CMS CSV goes here (not tracked in git)
+├── docs/                     # Clinical PDFs + ChromaDB (not tracked)
+├── .env                      # API key (not tracked in git)
+└── .gitignore
+=======
 
 https://github.com/user-attachments/assets/e15d9342-8aac-4eb6-b935-3d42d47e3758
 
@@ -145,6 +202,7 @@ https://github.com/user-attachments/assets/e15d9342-8aac-4eb6-b935-3d42d47e3758
 ├── .env                  # API key (not tracked in git)
 ├── .gitignore
 └── README.md
+>>>>>>> ed1291732f4a5a618228ff81d1d8c149eafe3000
 ```
 
 ---
@@ -165,11 +223,11 @@ https://github.com/user-attachments/assets/7f1ebe63-5054-442f-aa99-2eb62ef40613
 
 ## Why This Project
 
-Most NL-to-SQL demos use toy datasets with 5 columns and 100 rows.
+Most NL-to-SQL demos use toy datasets. Most RAG demos use simple Q&A over a single PDF.
 
-This agent runs against **26.7 million real Medicare records** — the kind of data that exists inside every health system in the US. The domain complexity (provider specialties, drug formularies, suppressed CMS values, beneficiary counts) makes this a realistic healthcare AI engineering problem, not a tutorial exercise.
+This agent combines both patterns against real healthcare data — the same kind of data that exists inside every health system in the US. The domain complexity (provider specialties, drug formularies, suppressed CMS values, clinical coding) makes this a realistic healthcare AI engineering problem, not a tutorial exercise.
 
-The goal is to demonstrate that healthcare domain knowledge combined with LLM tool-calling can make complex government datasets accessible to non-technical clinical and operations staff.
+The goal: demonstrate that healthcare domain knowledge combined with LLM tool-calling can make complex government datasets and clinical guidelines accessible to non-technical clinical and operations staff.
 
 ---
 
